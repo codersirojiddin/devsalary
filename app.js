@@ -14,8 +14,9 @@ let renderedCount = 0;
 
 const PAGE_SIZE = 120;
 
-// If using Next.js public/explorer, switch to: "/explorer/devsalary-data.json"
-const DATA_URL = "./devsalary-data.json";
+// ✅ Supports country pages: you can override in HTML before loading app.js:
+// window.__DATA_URL__ = "../../devsalary-data.json";
+const DATA_URL = window.__DATA_URL__ || "./devsalary-data.json";
 
 const fmtMoney = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -32,19 +33,26 @@ async function init() {
     salaries = await response.json();
 
     buildFilters();
-    bindEvents();
 
+    // ✅ NEW: auto-select country if page defines it
+    applyDefaultCountryFromPage();
+
+    bindEvents();
     applyFiltersAndRender(true);
   } catch (error) {
     loadNotice.textContent =
-      "Data could not be loaded. Run this in a local server (example: python -m http.server).";
+      "Data could not be loaded. If you're testing locally, run a local server (example: python -m http.server).";
     console.error(error);
   }
 }
 
 function buildFilters() {
-  const countries = [...new Set(salaries.map((i) => i.country))].sort((a, b) => a.localeCompare(b));
-  const roles = [...new Set(salaries.map((i) => i.role))].sort((a, b) => a.localeCompare(b));
+  const countries = [...new Set(salaries.map((i) => i.country))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+  const roles = [...new Set(salaries.map((i) => i.role))].sort((a, b) =>
+    a.localeCompare(b)
+  );
 
   fillSelect(countryFilter, [
     { label: "All countries", value: "all" },
@@ -64,11 +72,22 @@ function buildFilters() {
   ]);
 }
 
+// ✅ NEW: country pages can set a default country like:
+// window.__DEFAULT_COUNTRY__ = "Germany";
+function applyDefaultCountryFromPage() {
+  const def = (window.__DEFAULT_COUNTRY__ || "").trim();
+  if (!def) return;
+
+  const exists = Array.from(countryFilter.options).some((o) => o.value === def);
+  if (exists) {
+    countryFilter.value = def;
+  }
+}
+
 function bindEvents() {
   countryFilter.addEventListener("change", () => applyFiltersAndRender(true));
   levelFilter.addEventListener("change", () => applyFiltersAndRender(true));
   roleFilter.addEventListener("change", () => applyFiltersAndRender(true));
-
   loadMoreBtn.addEventListener("click", () => renderTableNextPage());
 }
 
@@ -181,7 +200,6 @@ function renderTableNextPage() {
   }
 
   const sorted = currentFiltered.slice().sort((a, b) => b.annual_usd - a.annual_usd);
-
   const nextSlice = sorted.slice(renderedCount, renderedCount + PAGE_SIZE);
 
   const rowsHtml = nextSlice
@@ -200,7 +218,6 @@ function renderTableNextPage() {
   salaryRows.insertAdjacentHTML("beforeend", rowsHtml);
 
   renderedCount += nextSlice.length;
-
   loadMoreBtn.hidden = renderedCount >= currentFiltered.length;
   loadMoreBtn.textContent = renderedCount >= currentFiltered.length ? "All loaded" : "Load more";
 }
@@ -224,6 +241,7 @@ function esc(str) {
     "'": "&#39;",
   }[m]));
 }
+
 function escAttr(str) {
   return esc(str);
 }
