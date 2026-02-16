@@ -4,27 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Developer Salary Explorer (Annual USD) — 30 Countries, 25 Roles</title>
+  <title>Developer Salary by Country & Role (USD) — DevSalary</title>
   <meta
     name="description"
-    content="Explore estimated annual developer salaries by country, role, and level (Junior/Mid/Senior). Filter, compare averages, and view top-paying roles."
+    content="Explore estimated annual developer salaries by country, role, and level (Junior/Mid/Senior). Compare averages, top-paying roles, and salary ranges worldwide."
   />
   <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://example.com/" />
+  <link rel="canonical" href="https://devsalary.online/" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Developer Salary Explorer (Annual USD)" />
+  <meta property="og:title" content="Developer Salary by Country & Role (USD) — DevSalary" />
   <meta
     property="og:description"
-    content="Filter developer salary estimates by country, role, and level. Compare averages and top-paying roles."
+    content="Compare developer salaries by country, role, and experience level. Explore averages, ranges, and top-paying roles worldwide."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://example.com/" />
+  <meta property="og:url" content="https://devsalary.online/" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Developer Salary Explorer (Annual USD)" />
-  <meta name="twitter:description" content="Explore developer salary estimates by country, role, and level." />
+  <meta name="twitter:title" content="Developer Salary by Country & Role (USD) — DevSalary" />
+  <meta
+    name="twitter:description"
+    content="Compare developer salaries by country, role, and level. Explore averages and top-paying roles worldwide."
+  />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,13 +41,18 @@
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Developer Salary Explorer",
-      "url": "https://example.com/",
-      "description": "Explore estimated annual developer salaries by country, role, and level."
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DevSalary",
+    "url": "https://devsalary.online/",
+    "description": "Explore estimated annual developer salaries by country, role, and level.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://devsalary.online/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
     }
+  }
   </script>
 </head>
 
@@ -54,7 +62,7 @@
       <p class="kicker">Annual Compensation Explorer</p>
       <h1>Developer Jobs — Yearly Salary (USD)</h1>
       <p class="subtitle">
-        Filter salary estimates by country, role, and level. 
+        Filter salary estimates by country, role, and level.
       </p>
     </header>
 
@@ -110,39 +118,59 @@
     </section>
 
     <p class="note" id="loadNotice" role="status" aria-live="polite"></p>
+
+    <!-- SEO-only content (indexed, not visible) -->
+    <section class="seo-content" aria-label="About DevSalary">
+      <h2>Developer Salary Data by Country, Role, and Experience Level</h2>
+      <p>
+        DevSalary helps you explore estimated annual developer salaries across countries, roles, and seniority levels.
+        Use the filters to compare pay for Software Engineers, Backend Developers, Frontend Developers, DevOps Engineers,
+        Data Scientists, and more.
+      </p>
+      <p>
+        Salaries can vary based on location, company type, and experience level. This dashboard highlights averages,
+        ranges, and top-paying roles to support career planning and salary negotiations.
+      </p>
+
+      <h3>How to use the salary explorer</h3>
+      <ul>
+        <li>Select a country to view local market estimates.</li>
+        <li>Choose a role to compare specializations.</li>
+        <li>Pick a level (Junior/Mid/Senior) to understand seniority impact.</li>
+      </ul>
+    </section>
   </main>
 
   <footer class="footer">
-  <div class="footer-inner">
+    <div class="footer-inner">
 
-    <div class="footer-brand">
-      <h3>Developer Salary Explorer</h3>
-      <p>
-        Global developer compensation insights across countries, roles, and experience levels.
-      </p>
+      <div class="footer-brand">
+        <h3>Developer Salary Explorer</h3>
+        <p>
+          Global developer compensation insights across countries, roles, and experience levels.
+        </p>
+      </div>
+
+      <div class="footer-disclaimer">
+        <h4>Disclaimer</h4>
+        <p>
+          Salaries displayed on this website are estimates generated from analytical models,
+          market research, and publicly available information. They are provided for
+          informational purposes only.
+        </p>
+        <p>
+          We do not guarantee that you will receive the displayed compensation.
+          Actual salaries may vary depending on company, location, skills,
+          negotiation, and many other factors.
+        </p>
+      </div>
+
     </div>
 
-    <div class="footer-disclaimer">
-      <h4>Disclaimer</h4>
-      <p>
-        Salaries displayed on this website are estimates generated from analytical models,
-        market research, and publicly available information. They are provided for
-        informational purposes only.
-      </p>
-      <p>
-        We do not guarantee that you will receive the displayed compensation.
-        Actual salaries may vary depending on company, location, skills,
-        negotiation, and many other factors.
-      </p>
+    <div class="footer-bottom">
+      © 2026 Developer Salary Explorer. All rights reserved.
     </div>
-
-  </div>
-
-  <div class="footer-bottom">
-    © 2026 Developer Salary Explorer. All rights reserved.
-  </div>
-</footer>
-
+  </footer>
 
   <script src="app.js" defer></script>
 </body>
