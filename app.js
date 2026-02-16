@@ -14,8 +14,8 @@ let renderedCount = 0;
 
 const PAGE_SIZE = 120;
 
-// ✅ Supports country pages: you can override in HTML before loading app.js:
-// window.__DATA_URL__ = "../../devsalary-data.json";
+// ✅ Country pages can override:
+// window.__DATA_URL__ = "/devsalary-data.json";
 const DATA_URL = window.__DATA_URL__ || "./devsalary-data.json";
 
 const fmtMoney = new Intl.NumberFormat("en-US", {
@@ -34,11 +34,14 @@ async function init() {
 
     buildFilters();
 
-    // ✅ NEW: auto-select country if page defines it
+    // ✅ If country page defines a default country
     applyDefaultCountryFromPage();
 
     bindEvents();
     applyFiltersAndRender(true);
+
+    // ✅ Make sure header/title matches current filter on load
+    syncCountryPageUI();
   } catch (error) {
     loadNotice.textContent =
       "Data could not be loaded. If you're testing locally, run a local server (example: python -m http.server).";
@@ -72,23 +75,33 @@ function buildFilters() {
   ]);
 }
 
-// ✅ NEW: country pages can set a default country like:
+// ✅ Country pages can set:
 // window.__DEFAULT_COUNTRY__ = "Germany";
 function applyDefaultCountryFromPage() {
   const def = (window.__DEFAULT_COUNTRY__ || "").trim();
   if (!def) return;
 
   const exists = Array.from(countryFilter.options).some((o) => o.value === def);
-  if (exists) {
-    countryFilter.value = def;
-  }
+  if (exists) countryFilter.value = def;
 }
 
 function bindEvents() {
-  countryFilter.addEventListener("change", () => applyFiltersAndRender(true));
+  countryFilter.addEventListener("change", () => {
+    // ✅ Update header/title/meta and URL (country pages only)
+    syncCountryPageUI();
+    syncCountryUrl();
+    applyFiltersAndRender(true);
+  });
+
   levelFilter.addEventListener("change", () => applyFiltersAndRender(true));
   roleFilter.addEventListener("change", () => applyFiltersAndRender(true));
   loadMoreBtn.addEventListener("click", () => renderTableNextPage());
+
+  // Optional: back/forward navigation support
+  window.addEventListener("popstate", () => {
+    // when URL changes via back button, we just sync UI
+    syncCountryPageUI();
+  });
 }
 
 function applyFiltersAndRender(resetPagination) {
@@ -106,11 +119,12 @@ function applyFiltersAndRender(resetPagination) {
 
 function getFilteredData() {
   const selectedCountry = countryFilter.value;
-  const selectedLevel = levelFilter.value; // already normalized
+  const selectedLevel = levelFilter.value;
   const selectedRole = roleFilter.value;
 
   return salaries.filter((item) => {
-    const countryOk = selectedCountry === "all" || item.country === selectedCountry;
+    const countryOk =
+      selectedCountry === "all" || item.country === selectedCountry;
     const levelOk = selectedLevel === "all" || item.level === selectedLevel;
     const roleOk = selectedRole === "all" || item.role === selectedRole;
     return countryOk && levelOk && roleOk;
@@ -199,7 +213,10 @@ function renderTableNextPage() {
     return;
   }
 
-  const sorted = currentFiltered.slice().sort((a, b) => b.annual_usd - a.annual_usd);
+  const sorted = currentFiltered
+    .slice()
+    .sort((a, b) => b.annual_usd - a.annual_usd);
+
   const nextSlice = sorted.slice(renderedCount, renderedCount + PAGE_SIZE);
 
   const rowsHtml = nextSlice
@@ -219,7 +236,8 @@ function renderTableNextPage() {
 
   renderedCount += nextSlice.length;
   loadMoreBtn.hidden = renderedCount >= currentFiltered.length;
-  loadMoreBtn.textContent = renderedCount >= currentFiltered.length ? "All loaded" : "Load more";
+  loadMoreBtn.textContent =
+    renderedCount >= currentFiltered.length ? "All loaded" : "Load more";
 }
 
 function fillSelect(select, options) {
@@ -232,14 +250,77 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+/* ---------------------------
+   ✅ Country page URL + UI sync
+---------------------------- */
+
+function isCountryPage() {
+  return location.pathname.includes("/country/");
+}
+
+function countryNameToSlug(name) {
+  return String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
+}
+
+function syncCountryPageUI() {
+  if (!isCountryPage()) return;
+
+  const selectedCountry = countryFilter.value;
+  if (!selectedCountry || selectedCountry === "all") return;
+
+  const titleEl = document.getElementById("pageTitle");
+  const subEl = document.getElementById("pageSubtitle");
+
+  if (titleEl) titleEl.textContent = `Developer Salary in ${selectedCountry} (USD)`;
+  if (subEl) subEl.textContent = `Filter salaries by role and level for ${selectedCountry}.`;
+
+  // Title + meta description for better UX/SEO
+  document.title = `Developer Salary in ${selectedCountry} (USD) — DevSalary`;
+
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute(
+      "content",
+      `Explore estimated developer salaries in ${selectedCountry} by role and level (Junior/Mid/Senior). Compare averages, ranges, and top-paying roles.`
+    );
+  }
+}
+
+function syncCountryUrl() {
+  if (!isCountryPage()) return;
+
+  const selectedCountry = countryFilter.value;
+  if (!selectedCountry || selectedCountry === "all") return;
+
+  const slug = countryNameToSlug(selectedCountry);
+  const newPath = `/country/${slug}/`;
+
+  // Change URL without reload
+  if (location.pathname !== newPath) {
+    window.history.pushState({}, "", newPath);
+  }
+}
+
+/* ---------------------------
+   Escaping helpers
+---------------------------- */
+
 function esc(str) {
-  return String(str).replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[m]));
+  return String(str).replace(/[&<>"']/g, (m) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[m])
+  );
 }
 
 function escAttr(str) {
