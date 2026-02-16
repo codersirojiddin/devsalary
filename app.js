@@ -38,9 +38,11 @@ async function init() {
     applyDefaultCountryFromPage();
 
     bindEvents();
+
+    // ✅ FIRST render
     applyFiltersAndRender(true);
 
-    // ✅ Make sure header/title matches current filter on load
+    // ✅ Make sure header/title matches current selection
     syncCountryPageUI();
   } catch (error) {
     loadNotice.textContent =
@@ -86,26 +88,39 @@ function applyDefaultCountryFromPage() {
 }
 
 function bindEvents() {
+  // ✅ When country changes: update URL + UI + re-render
   countryFilter.addEventListener("change", () => {
-    // ✅ Update header/title/meta and URL (country pages only)
-    syncCountryPageUI();
     syncCountryUrl();
+    syncCountryPageUI();
     applyFiltersAndRender(true);
   });
 
-  levelFilter.addEventListener("change", () => applyFiltersAndRender(true));
-  roleFilter.addEventListener("change", () => applyFiltersAndRender(true));
+  // ✅ When level/role changes: still keep UI in sync
+  levelFilter.addEventListener("change", () => {
+    syncCountryPageUI();
+    applyFiltersAndRender(true);
+  });
+
+  roleFilter.addEventListener("change", () => {
+    syncCountryPageUI();
+    applyFiltersAndRender(true);
+  });
+
   loadMoreBtn.addEventListener("click", () => renderTableNextPage());
 
-  // Optional: back/forward navigation support
+  // ✅ Back/forward support
   window.addEventListener("popstate", () => {
-    // when URL changes via back button, we just sync UI
+    // If user goes back/forward, just sync UI (filters remain as is)
     syncCountryPageUI();
   });
 }
 
 function applyFiltersAndRender(resetPagination) {
   currentFiltered = getFilteredData();
+
+  // ✅ IMPORTANT: always sync UI on any render
+  syncCountryPageUI();
+
   renderStats(currentFiltered);
   renderChart(currentFiltered);
 
@@ -277,10 +292,11 @@ function syncCountryPageUI() {
   const titleEl = document.getElementById("pageTitle");
   const subEl = document.getElementById("pageSubtitle");
 
+  // ✅ Update visible hero texts
   if (titleEl) titleEl.textContent = `Developer Salary in ${selectedCountry} (USD)`;
   if (subEl) subEl.textContent = `Filter salaries by role and level for ${selectedCountry}.`;
 
-  // Title + meta description for better UX/SEO
+  // ✅ Update document title + meta description (SEO/UX)
   document.title = `Developer Salary in ${selectedCountry} (USD) — DevSalary`;
 
   const metaDesc = document.querySelector('meta[name="description"]');
@@ -312,17 +328,16 @@ function syncCountryUrl() {
 ---------------------------- */
 
 function esc(str) {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[m])
-  );
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[m]));
 }
 
 function escAttr(str) {
   return esc(str);
 }
+
