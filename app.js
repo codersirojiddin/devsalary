@@ -13,7 +13,7 @@ let currentFiltered = [];
 let renderedCount = 0;
 
 const PAGE_SIZE = 120;
-const DATA_URL = window.__DATA_URL__ || "./devsalary-data.json";
+const DATA_URL = "./devsalary-data.json";
 
 const fmtMoney = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -30,11 +30,9 @@ async function init() {
     salaries = await response.json();
 
     buildFilters();
-    applyDefaultCountryFromPage();
     bindEvents();
-
     applyFiltersAndRender(true);
-    syncCountryPageUI(); // ✅ always after first render
+    syncTitleAndMeta();
   } catch (error) {
     loadNotice.textContent =
       "Data could not be loaded. If you're testing locally, run a local server (example: python -m http.server).";
@@ -68,50 +66,24 @@ function buildFilters() {
   ]);
 }
 
-function applyDefaultCountryFromPage() {
-  const def = (window.__DEFAULT_COUNTRY__ || "").trim();
-  if (!def) return;
-
-  const exists = Array.from(countryFilter.options).some((o) => o.value === def);
-  if (exists) countryFilter.value = def;
-}
-
 function bindEvents() {
   countryFilter.addEventListener("change", () => {
-    const selectedCountry = countryFilter.value;
-
-    // ✅ country page ichida navigate qilamiz (SEO perfect)
-    if (isCountryPage()) {
-      if (selectedCountry === "all") {
-        window.location.assign("/");
-        return;
-      }
-      const slug = countryNameToSlug(selectedCountry);
-      window.location.assign(`/country/${slug}/`);
-      return;
-    }
-
-    // ✅ root page: SPA filter
     applyFiltersAndRender(true);
-    syncCountryPageUI();
+    syncTitleAndMeta();
   });
-
   levelFilter.addEventListener("change", () => {
     applyFiltersAndRender(true);
-    syncCountryPageUI();
+    syncTitleAndMeta();
   });
-
   roleFilter.addEventListener("change", () => {
     applyFiltersAndRender(true);
-    syncCountryPageUI();
+    syncTitleAndMeta();
   });
-
   loadMoreBtn.addEventListener("click", () => renderTableNextPage());
 }
 
 function applyFiltersAndRender(resetPagination) {
   currentFiltered = getFilteredData();
-
   renderStats(currentFiltered);
   renderChart(currentFiltered);
 
@@ -129,8 +101,7 @@ function getFilteredData() {
   const selectedRole = roleFilter.value;
 
   return salaries.filter((item) => {
-    const countryOk =
-      selectedCountry === "all" || item.country === selectedCountry;
+    const countryOk = selectedCountry === "all" || item.country === selectedCountry;
     const levelOk = selectedLevel === "all" || item.level === selectedLevel;
     const roleOk = selectedRole === "all" || item.role === selectedRole;
     return countryOk && levelOk && roleOk;
@@ -242,6 +213,35 @@ function renderTableNextPage() {
   loadMoreBtn.textContent = renderedCount >= currentFiltered.length ? "All loaded" : "Load more";
 }
 
+function syncTitleAndMeta() {
+  const c = countryFilter.value;
+  const l = levelFilter.value;
+  const r = roleFilter.value;
+
+  const titleEl = document.getElementById("pageTitle");
+  const subEl = document.getElementById("pageSubtitle");
+
+  const parts = [];
+  if (r !== "all") parts.push(r);
+  if (l !== "all") parts.push(capitalize(l));
+  if (c !== "all") parts.push(c);
+
+  const nice = parts.length ? parts.join(" • ") : "All countries • All roles • All levels";
+
+  if (titleEl) titleEl.textContent = "Developer Jobs — Yearly Salary (USD)";
+  if (subEl) subEl.textContent = `Showing: ${nice}`;
+
+  document.title = `Developer Salary Explorer (Annual USD) — DevSalary`;
+
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute(
+      "content",
+      "Explore estimated annual developer salaries by country, role, and level (Junior/Mid/Senior). Filter, compare averages, and view top-paying roles."
+    );
+  }
+}
+
 function fillSelect(select, options) {
   select.innerHTML = options
     .map((o) => `<option value="${escAttr(o.value)}">${esc(o.label)}</option>`)
@@ -252,19 +252,16 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-/* ---------------------------
-   Country page helpers
----------------------------- */
-
-function isCountryPage() {
-  return location.pathname.includes("/country/");
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[m]));
 }
 
-function countryNameToSlug(name) {
-  return String(name)
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[\s_]+/g, "-")
-    .replace(/[^\w-]+/g, "")
-    .replace(/--+/g, "-
+function escAttr(str) {
+  return esc(str);
+}
