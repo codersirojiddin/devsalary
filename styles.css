@@ -43,8 +43,6 @@ select option:checked{
   color: rgba(255,255,255,.95);
 }
 
-
-
 /* Background glow */
 body::before{
   content:"";
@@ -470,3 +468,12 @@ tbody td:last-child{
   }
 }
 
+/* SEO content: keep indexed, not visible */
+.seo-content{
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
