@@ -48,15 +48,84 @@
       "description": "Explore estimated annual developer salaries by country, role, and level."
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Where does DevSalary's salary data come from?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DevSalary compiles estimates from publicly available job listings, government labor statistics, and community-reported compensation surveys, then normalizes them into a single annual USD figure per role, level, and country so they can be compared side by side."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are these salaries guaranteed or exact figures?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Every number on DevSalary is a modeled estimate meant to show general market ranges. Actual pay depends on the specific employer, your negotiated terms, cost of living, company size, and individual experience, so treat these figures as a starting reference point rather than a guarantee."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How are Junior, Mid, and Senior levels defined?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Junior generally covers 0 to 2 years of professional experience, Mid covers roughly 2 to 5 years with independent ownership of features, and Senior covers 5+ years with responsibility for architecture, mentorship, or cross-team decisions. Titles vary by company, so use years of experience and scope of responsibility as the better guide."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why do salaries for the same role vary so much by country?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Compensation reflects local cost of living, currency strength, market demand for developers, company funding stage, and whether a role is hired for a domestic or a global remote market. A Senior Backend Developer hired remotely by a US company, for example, is typically paid closer to US market rates than a locally-hired equivalent."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often is the data updated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We review and refresh the dataset periodically as new market data becomes available. Because software hiring markets shift with funding cycles and demand for specific skills, we recommend cross-checking any figure against a couple of current job postings for that exact role and location before relying on it."
+          }
+        }
+      ]
+    }
+  </script>
 </head>
 
 <body>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="brand" href="/">
+      <img src="logo.png" alt="DevSalary logo" width="26" height="26" />
+      DevSalary
+    </a>
+    <div class="nav-links">
+      <a href="/" aria-current="page">Salary Explorer</a>
+      <a href="/#methodology">Methodology</a>
+      <a href="/#faq">FAQ</a>
+      <a href="about.html">About</a>
+      <a href="blog/index.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
   <main class="page">
     <header class="hero">
       <p class="kicker">Annual Compensation Explorer</p>
       <h1 id="pageTitle">Developer Jobs — Yearly Salary (USD)</h1>
       <p class="subtitle" id="pageSubtitle">
         Filter salary estimates by country, role, and level.
+      </p>
+      <p class="subtitle" style="margin-top:10px;">
+        DevSalary is a free reference tool for software developers, hiring managers, and recruiters who want a
+        quick sense of typical annual pay by role, seniority level, and country. Pick any combination of filters
+        below to see matching records, a summary of the range, and a comparison chart of the highest-paying roles
+        for that slice of the market.
       </p>
     </header>
 
@@ -112,6 +181,72 @@
     </section>
 
     <p class="note" id="loadNotice" role="status" aria-live="polite"></p>
+
+    <section class="panel content-panel" id="methodology" aria-label="Methodology">
+      <h2>How these estimates are built</h2>
+      <p>
+        Every record in DevSalary combines three inputs: publicly posted job listings that state a salary or salary
+        range, national labor-statistics datasets where available, and community-reported compensation surveys from
+        developers themselves. Because job listings quote everything from hourly contractor rates to total
+        compensation packages, we normalize each figure into a single <strong>annual base salary in US dollars</strong>
+        so that a role in Warsaw and the same role in San Francisco can be compared on the same axis.
+      </p>
+      <p>
+        Each entry is tagged with a <strong>role</strong> (for example, Frontend Developer or DevOps Engineer), a
+        <strong>seniority level</strong> (Junior, Mid, or Senior), and a <strong>country</strong>. We deliberately keep
+        the model simple — three dimensions, one currency — so the numbers stay easy to compare rather than
+        implying a false level of precision. These are estimates for orientation, not payroll data.
+      </p>
+      <h3>What the numbers don't capture</h3>
+      <p>
+        Equity, bonuses, benefits, remote-work stipends, and regional tax treatment are not reflected in the base
+        salary figure. Two companies advertising the same base salary for a Senior Backend Developer can end up
+        with very different total compensation once equity and bonus structures are factored in. Use the numbers
+        here as a starting point for research, not as the final word in a negotiation.
+      </p>
+    </section>
+
+    <section class="panel content-panel" id="faq" aria-label="Frequently asked questions">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>Where does the salary data come from?</h3>
+        <p>
+          We compile estimates from public job listings, government labor statistics, and self-reported developer
+          compensation surveys, then normalize them into one annual USD figure per role, level, and country.
+        </p>
+      </div>
+      <div class="faq-item">
+        <h3>Are these exact, guaranteed figures?</h3>
+        <p>
+          No — every number is a modeled estimate showing a general market range. Your actual offer depends on the
+          employer, company size, cost of living, and your own experience and negotiation.
+        </p>
+      </div>
+      <div class="faq-item">
+        <h3>How are Junior, Mid, and Senior defined?</h3>
+        <p>
+          Roughly: Junior is 0–2 years of experience, Mid is 2–5 years with independent ownership of features, and
+          Senior is 5+ years with architecture, mentorship, or cross-team responsibility. Titles vary by company, so
+          treat these as guides rather than fixed rules.
+        </p>
+      </div>
+      <div class="faq-item">
+        <h3>Why does the same role pay so differently by country?</h3>
+        <p>
+          Cost of living, currency strength, local demand for developers, and whether a role is hired for a
+          domestic or a global remote market all move the number. A role hired remotely by a company based in a
+          higher cost-of-living country often pays closer to that company's home-market rate.
+        </p>
+      </div>
+      <div class="faq-item">
+        <h3>How often is the dataset refreshed?</h3>
+        <p>
+          We review and update the dataset periodically as new market data comes in. Because hiring markets shift
+          with funding cycles and skill demand, cross-check any figure against a couple of current job postings
+          before relying on it for a real decision.
+        </p>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">
@@ -121,10 +256,19 @@
         <p>Global developer compensation insights across countries, roles, and experience levels.</p>
       </div>
 
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/">Salary Explorer</a>
+        <a href="about.html">About</a>
+        <a href="blog/index.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
+      </nav>
+
       <div class="footer-disclaimer">
         <h4>Disclaimer</h4>
         <p>Salaries displayed on this website are estimates for informational purposes only.</p>
-        <p>We do not guarantee you will receive the displayed compensation. Actual salaries vary.</p>
+        <p>We do not guarantee you will receive the displayed compensation. Actual salaries vary by employer, location, and individual circumstances.</p>
       </div>
     </div>
 

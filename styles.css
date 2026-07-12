@@ -468,12 +468,268 @@ tbody td:last-child{
   }
 }
 
-/* SEO content: keep indexed, not visible */
-.seo-content{
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
+/* NAV */
+.site-nav{
+  width: min(1120px, 92vw);
+  margin: 0 auto;
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.brand img{
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: block;
+}
+
+.nav-links{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nav-links a{
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: color .15s ease, background .15s ease;
+}
+
+.nav-links a:hover{
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+}
+
+.nav-links a[aria-current="page"]{
+  color: var(--text);
+  background: rgba(255,255,255,.09);
+  border: 1px solid var(--stroke2);
+}
+
+@media (max-width: 640px){
+  .site-nav{ flex-direction: column; align-items: flex-start; gap: 10px; }
+  .nav-links{ gap: 2px; }
+  .nav-links a{ padding: 7px 9px; font-size: 12.5px; }
+}
+
+/* ARTICLE / CONTENT PAGES */
+.content-panel{
+  line-height: 1.75;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.content-panel h2{
+  color: var(--text);
+  font-size: 20px;
+  margin: 28px 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.content-panel h2:first-child{ margin-top: 0; }
+
+.content-panel h3{
+  color: var(--text);
+  font-size: 16px;
+  margin: 20px 0 8px;
+}
+
+.content-panel p{ margin: 0 0 14px; }
+
+.content-panel ul, .content-panel ol{
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+
+.content-panel li{ margin-bottom: 6px; }
+
+.content-panel a{
+  color: rgba(160,190,255,.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(160,190,255,.35);
+  text-underline-offset: 3px;
+}
+
+.content-panel a:hover{ text-decoration-color: rgba(160,190,255,.9); }
+
+.content-panel strong{ color: var(--text); }
+
+/* FAQ */
+.faq-item{
+  border-bottom: 1px solid var(--stroke2);
+  padding: 16px 0;
+}
+.faq-item:last-child{ border-bottom: none; }
+.faq-item h3{ margin: 0 0 8px; font-size: 15px; color: var(--text); }
+.faq-item p{ margin: 0; color: var(--muted); font-size: 14px; }
+
+/* Contact form */
+.contact-form{
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+}
+.contact-form label{ font-size: 12.5px; color: var(--muted); }
+.contact-form input,
+.contact-form textarea{
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  border-radius: var(--radius2);
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.25);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.contact-form textarea{ resize: vertical; min-height: 120px; }
+.contact-form input:focus,
+.contact-form textarea:focus{
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 4px var(--focus);
+}
+
+.contact-email{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--stroke2);
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+/* BLOG INDEX */
+.blog-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.blog-card{
+  padding: 18px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow2);
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+.blog-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.22);
+}
+
+.blog-card .blog-kicker{
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+
+.blog-card h2{
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.blog-card p{
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.blog-card .blog-meta{
+  margin-top: auto;
+  font-size: 12px;
+  color: var(--muted2);
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+@media (max-width: 760px){
+  .blog-grid{ grid-template-columns: 1fr; }
+}
+
+/* ARTICLE PAGE */
+.article-meta{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  color: var(--muted2);
+  margin-top: 6px;
+}
+
+.back-link{
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+.back-link:hover{ color: var(--text); }
+
+.article-body{
+  line-height: 1.8;
+  color: var(--muted);
+  font-size: 15.5px;
+}
+.article-body h2{
+  color: var(--text);
+  font-size: 20px;
+  margin: 30px 0 12px;
+}
+.article-body h2:first-child{ margin-top: 0; }
+.article-body p{ margin: 0 0 16px; }
+.article-body ul, .article-body ol{ margin: 0 0 16px; padding-left: 20px; }
+.article-body li{ margin-bottom: 8px; }
+.article-body strong{ color: var(--text); }
+
+/* COMMENTS */
+.comments-panel{
+  margin-top: 16px;
+}
+.comments-panel h2{
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: var(--text);
+}
+.comments-note{
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  color: var(--muted2);
 }
