@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DevSalary product roadmap — from salary exploration to AI-powered career intelligence." />
+  <title>DevSalary — Roadmap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="cursor-glow"></div>
+
+  <header class="nav">
+    <a class="brand" href="https://devsalary.online">dev<span>salary</span><i>.</i></a>
+    <div class="nav-right">
+      <span class="status"><b></b> Building in public</span>
+      <a href="https://devsalary.online" class="nav-link">Salary Explorer ↗</a>
+      <a href="https://github.com/codersirojiddin/devsalary" class="github">GitHub ↗</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow reveal">DEVSalary / ROADMAP</div>
+      <h1 class="hero-title reveal">
+        From salary data<br />
+        <span>to career intelligence.</span>
+      </h1>
+      <p class="hero-copy reveal">
+        We're building the intelligence layer between developers,
+        compensation data, and their next career move.
+      </p>
+      <div class="hero-actions reveal">
+        <a href="#roadmap" class="button button-primary">Explore roadmap <span>↓</span></a>
+        <a href="https://devsalary.online" class="button button-ghost">Open DevSalary ↗</a>
+      </div>
+      <div class="scroll-hint"><span></span> Scroll to explore</div>
+    </section>
+
+    <section class="statement">
+      <div class="statement-inner">
+        <span class="section-label">THE DIRECTION</span>
+        <p class="statement-text">
+          Know the market.<br>
+          <em>Know your value.</em><br>
+          Know your next move.
+        </p>
+      </div>
+    </section>
+
+    <section id="roadmap" class="roadmap">
+      <div class="roadmap-head">
+        <div>
+          <span class="section-label">PRODUCT ROADMAP</span>
+          <h2>One system.<br><span>Four stages.</span></h2>
+        </div>
+        <p>Scroll through the evolution of DevSalary.</p>
+      </div>
+
+      <div class="timeline" id="timeline">
+        <div class="timeline-line"><div class="timeline-progress"></div></div>
+
+        <article class="milestone active" data-index="0">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">NOW</span><span class="state live">LIVE</span></div>
+            <h3>Salary Explorer</h3>
+            <p>Explore developer compensation across roles, countries and experience levels.</p>
+            <div class="tags"><span>Salary</span><span>Country</span><span>Level</span></div>
+          </div>
+          <div class="visual salary-visual">
+            <div class="visual-label">MARKET DATA</div>
+            <div class="salary-row"><span>Backend Engineer</span><b>$82k</b></div>
+            <div class="salary-row"><span>Frontend Engineer</span><b>$76k</b></div>
+            <div class="salary-row"><span>DevOps Engineer</span><b>$91k</b></div>
+            <div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </article>
+
+        <article class="milestone" data-index="1">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">PHASE 0</span><span class="state">NEXT</span></div>
+            <h3>Data Model 2.0</h3>
+            <p>A stronger foundation for richer compensation analysis and every feature that follows.</p>
+            <div class="tags"><span>Data model</span><span>Normalization</span><span>Quality</span></div>
+          </div>
+          <div class="visual data-visual">
+            <div class="visual-label">DATA MODEL</div>
+            <div class="data-grid">
+              <div><small>ROLE</small><strong>Backend</strong></div>
+              <div><small>LEVEL</small><strong>Senior</strong></div>
+              <div><small>COUNTRY</small><strong>US</strong></div>
+              <div><small>MODEL</small><strong>Remote</strong></div>
+            </div>
+            <div class="data-stream">•••  normalized compensation records  •••</div>
+          </div>
+        </article>
+
+        <article class="milestone" data-index="2">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V1.1</span><span class="state">PLANNED</span></div>
+            <h3>Salary Growth</h3>
+            <p>Understand how skills and experience can change your position in the market.</p>
+            <div class="tags"><span>Skills</span><span>Growth</span><span>Market value</span></div>
+          </div>
+          <div class="visual growth-visual">
+            <div class="visual-label">MARKET VALUE</div>
+            <div class="big-number">$68.5k <small>+31.7%</small></div>
+            <div class="growth-bars"><i style="height:38%"></i><i style="height:46%"></i><i style="height:53%"></i><i style="height:62%"></i><i style="height:74%"></i><i style="height:88%"></i></div>
+            <div class="growth-caption"><span>$52k</span><span>skill progression</span><span>$68.5k</span></div>
+          </div>
+        </article>
+
+        <article class="milestone" data-index="3">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V1.2</span><span class="state">PLANNED</span></div>
+            <h3>Global Compensation</h3>
+            <p>Move beyond gross salary with country, net salary and cost-of-living context.</p>
+            <div class="tags"><span>Net salary</span><span>COL</span><span>Purchasing power</span></div>
+          </div>
+          <div class="visual compare-visual">
+            <div class="visual-label">GLOBAL VIEW</div>
+            <div class="country"><span>🇺🇸 United States</span><b>$80k → $61k net</b></div>
+            <div class="country"><span>🇩🇪 Germany</span><b>$74k → $47k net</b></div>
+            <div class="country"><span>🇬🇧 United Kingdom</span><b>$71k → $53k net</b></div>
+            <small class="fine">Illustrative interface preview</small>
+          </div>
+        </article>
+
+        <article class="milestone" data-index="4">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V1.3</span><span class="state">PLANNED</span></div>
+            <h3>Work Model</h3>
+            <p>See how remote, hybrid and on-site work models affect compensation context.</p>
+            <div class="tags"><span>Remote</span><span>Hybrid</span><span>On-site</span></div>
+          </div>
+          <div class="visual work-visual">
+            <div class="visual-label">WORK MODEL</div>
+            <div class="work-tabs"><span class="selected">REMOTE</span><span>HYBRID</span><span>ON-SITE</span></div>
+            <div class="work-number">$94,200</div>
+            <div class="work-line"><span></span></div>
+            <small>compensation context by work model</small>
+          </div>
+        </article>
+
+        <article class="milestone hero-milestone" data-index="5">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V1.5</span><span class="state focus">KEY MILESTONE</span></div>
+            <h3>What's My<br>Market Value?</h3>
+            <p>Turn your role, skills, experience and work preferences into a personalized market-value profile.</p>
+            <div class="tags"><span>Profile</span><span>Skills</span><span>Market value</span></div>
+          </div>
+          <div class="visual market-visual">
+            <div class="visual-label">YOUR MARKET VALUE</div>
+            <div class="market-range">$72k <span>—</span> $91k</div>
+            <div class="market-meter"><span></span></div>
+            <div class="market-foot"><span>MARKET POSITION</span><b>Strong</b></div>
+            <div class="market-signals"><span>✓ Backend</span><span>✓ Cloud</span><span>+ System Design</span></div>
+          </div>
+        </article>
+
+        <article class="milestone" data-index="6">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V2.0</span><span class="state">PLANNED</span></div>
+            <h3>AI Resume Evaluator</h3>
+            <p>Connect your resume to the market data engine and understand what your experience signals.</p>
+            <div class="tags"><span>AI</span><span>Resume</span><span>Market fit</span></div>
+          </div>
+          <div class="visual resume-visual">
+            <div class="visual-label">AI RESUME ANALYSIS</div>
+            <div class="score"><b>87</b><span>market fit</span></div>
+            <div class="scan-lines"><i></i><i></i><i></i><i></i></div>
+            <div class="resume-bottom"><span>Strong signals</span><span>Missing signals</span></div>
+          </div>
+        </article>
+
+        <article class="milestone final-milestone" data-index="7">
+          <div class="node"><span></span></div>
+          <div class="milestone-content">
+            <div class="meta"><span class="version">V2.1</span><span class="state future">FUTURE</span></div>
+            <h3>AI Career Roadmap</h3>
+            <p>From your current profile to your target role — with a practical path between the two.</p>
+            <div class="tags"><span>AI</span><span>Skills</span><span>Career path</span></div>
+          </div>
+          <div class="visual career-visual">
+            <div class="visual-label">YOUR NEXT MOVE</div>
+            <div class="career-path">
+              <div><span class="dot current"></span><label>Backend Developer<small>$62k</small></label></div>
+              <div class="connector"></div>
+              <div><span class="dot"></span><label>Senior Engineer<small>Target</small></label></div>
+              <div class="connector"></div>
+              <div><span class="dot target"></span><label>Staff Engineer<small>Future</small></label></div>
+            </div>
+            <div class="path-footer">skills → projects → milestones</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="closing-orb"></div>
+      <span class="section-label">THE END STATE</span>
+      <h2>Don't just know<br><em>what you earn.</em></h2>
+      <p>Understand what you're worth — and what to do next.</p>
+      <a href="https://devsalary.online" class="button button-primary">Explore DevSalary ↗</a>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 DevSalary</span>
+    <span>Built in public · <a href="https://github.com/codersirojiddin/devsalary">GitHub ↗</a></span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
