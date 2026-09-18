@@ -1,3 +1,5 @@
+const API_BASE_URL = "http://localhost:8080/api/v1";
+
 const countryFilter = document.getElementById("countryFilter");
 const levelFilter = document.getElementById("levelFilter");
 const roleFilter = document.getElementById("roleFilter");
@@ -13,7 +15,7 @@ let currentFiltered = [];
 let renderedCount = 0;
 
 const PAGE_SIZE = 120;
-const DATA_URL = "./devsalary-data.json";
+const API_PAGE_SIZE = 200;
 
 const fmtMoney = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -23,75 +25,238 @@ const fmtMoney = new Intl.NumberFormat("en-US", {
 
 init();
 
+/* =========================================================
+   INIT
+========================================================= */
+
 async function init() {
   try {
-    const response = await fetch(DATA_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    salaries = await response.json();
+    setLoadingState(true);
+
+    await checkApi();
+
+    salaries = await fetchAllSalaries();
+
+    if (!Array.isArray(salaries)) {
+      throw new Error("Invalid salary data received from API");
+    }
 
     buildFilters();
     bindEvents();
+
+    // Set defaults
+    countryFilter.value = "all";
+    levelFilter.value = "all";
+    roleFilter.value = "all";
+
     applyFiltersAndRender(true);
     syncTitleAndMeta();
+
+    loadNotice.textContent = `Connected to DevSalary API • ${salaries.length.toLocaleString()} records`;
+    loadNotice.classList.remove("error");
   } catch (error) {
+    console.error("DevSalary initialization error:", error);
+
     loadNotice.textContent =
-      "Data could not be loaded. If you're testing locally, run a local server (example: python -m http.server).";
-    console.error(error);
+      "Could not connect to the DevSalary API. Make sure the Go backend is running on http://localhost:8080.";
+
+    loadNotice.classList.add("error");
+  } finally {
+    setLoadingState(false);
   }
 }
 
+/* =========================================================
+   API
+========================================================= */
+
+async function checkApi() {
+  const response = await fetch(`${API_BASE_URL}/health`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`API health check failed: HTTP ${response.status}`);
+  }
+}
+
+async function fetchAllSalaries() {
+  const allRecords = [];
+  let offset = 0;
+
+  while (true) {
+    const url = new URL(`${API_BASE_URL}/salaries`);
+
+    url.searchParams.set("limit", API_PAGE_SIZE);
+    url.searchParams.set("offset", offset);
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch salaries: HTTP ${response.status}`
+      );
+    }
+
+    const payload = await response.json();
+
+    const records = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload.data)
+      ? payload.data
+      : [];
+
+    allRecords.push(...records);
+
+    if (records.length < API_PAGE_SIZE) {
+      break;
+    }
+
+    offset += API_PAGE_SIZE;
+  }
+
+  return allRecords;
+}
+
+async function fetchFilteredFromAPI() {
+  const url = new URL(`${API_BASE_URL}/salaries`);
+
+  const country = countryFilter.value;
+  const level = levelFilter.value;
+  const role = roleFilter.value;
+
+  if (country !== "all") {
+    url.searchParams.set("country", country);
+  }
+
+  if (level !== "all") {
+    url.searchParams.set("level", level);
+  }
+
+  if (role !== "all") {
+    url.searchParams.set("role", role);
+  }
+
+  // Current frontend already has all records cached,
+  // so this function is available for future server-side filtering.
+  url.searchParams.set("limit", 200);
+  url.searchParams.set("offset", 0);
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch filtered salaries: HTTP ${response.status}`
+    );
+  }
+
+  const payload = await response.json();
+
+  return Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.data)
+    ? payload.data
+    : [];
+}
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
 function buildFilters() {
-  const countries = [...new Set(salaries.map((i) => i.country))].sort((a, b) =>
-    a.localeCompare(b)
-  );
-  const roles = [...new Set(salaries.map((i) => i.role))].sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const countries = [
+    ...new Set(
+      salaries
+        .map((item) => item.country)
+        .filter(Boolean)
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+
+  const roles = [
+    ...new Set(
+      salaries
+        .map((item) => item.role)
+        .filter(Boolean)
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+
+  const levels = [
+    ...new Set(
+      salaries
+        .map((item) => item.level)
+        .filter(Boolean)
+    ),
+  ];
 
   fillSelect(countryFilter, [
     { label: "All countries", value: "all" },
-    ...countries.map((c) => ({ label: c, value: c })),
+    ...countries.map((country) => ({
+      label: country,
+      value: country,
+    })),
   ]);
+
+  // Keep the normal order even if database contains other values.
+  const preferredLevels = ["junior", "mid", "senior"];
+
+  const sortedLevels = [
+    ...preferredLevels.filter((level) => levels.includes(level)),
+    ...levels.filter((level) => !preferredLevels.includes(level)),
+  ];
 
   fillSelect(levelFilter, [
     { label: "All levels", value: "all" },
-    { label: "Junior", value: "junior" },
-    { label: "Mid", value: "mid" },
-    { label: "Senior", value: "senior" },
+    ...sortedLevels.map((level) => ({
+      label: capitalize(level),
+      value: level,
+    })),
   ]);
 
   fillSelect(roleFilter, [
     { label: "All roles", value: "all" },
-    ...roles.map((r) => ({ label: r, value: r })),
+    ...roles.map((role) => ({
+      label: role,
+      value: role,
+    })),
   ]);
 }
 
 function bindEvents() {
-  countryFilter.addEventListener("change", () => {
-    applyFiltersAndRender(true);
-    syncTitleAndMeta();
+  countryFilter.addEventListener("change", handleFilterChange);
+  levelFilter.addEventListener("change", handleFilterChange);
+  roleFilter.addEventListener("change", handleFilterChange);
+
+  loadMoreBtn.addEventListener("click", () => {
+    renderTableNextPage();
   });
-  levelFilter.addEventListener("change", () => {
-    applyFiltersAndRender(true);
-    syncTitleAndMeta();
-  });
-  roleFilter.addEventListener("change", () => {
-    applyFiltersAndRender(true);
-    syncTitleAndMeta();
-  });
-  loadMoreBtn.addEventListener("click", () => renderTableNextPage());
 }
 
-function applyFiltersAndRender(resetPagination) {
+function handleFilterChange() {
+  applyFiltersAndRender(true);
+  syncTitleAndMeta();
+}
+
+/* =========================================================
+   FILTERING
+========================================================= */
+
+function applyFiltersAndRender(resetPagination = true) {
   currentFiltered = getFilteredData();
-  renderStats(currentFiltered);
-  renderChart(currentFiltered);
 
   if (resetPagination) {
     renderedCount = 0;
     salaryRows.innerHTML = "";
   }
 
+  renderStats(currentFiltered);
+  renderChart(currentFiltered);
   renderTableNextPage();
 }
 
@@ -101,79 +266,187 @@ function getFilteredData() {
   const selectedRole = roleFilter.value;
 
   return salaries.filter((item) => {
-    const countryOk = selectedCountry === "all" || item.country === selectedCountry;
-    const levelOk = selectedLevel === "all" || item.level === selectedLevel;
-    const roleOk = selectedRole === "all" || item.role === selectedRole;
+    const countryOk =
+      selectedCountry === "all" ||
+      item.country === selectedCountry;
+
+    const levelOk =
+      selectedLevel === "all" ||
+      item.level === selectedLevel;
+
+    const roleOk =
+      selectedRole === "all" ||
+      item.role === selectedRole;
+
     return countryOk && levelOk && roleOk;
   });
 }
 
+/* =========================================================
+   STATS
+========================================================= */
+
 function renderStats(data) {
   if (!data.length) {
+    stats.innerHTML = `
+      <article class="stat">
+        <h3>Matching records</h3>
+        <p>0</p>
+      </article>
+    `;
+
+    return;
+  }
+
+  const arr = data
+    .map((item) => Number(item.annual_usd))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+
+  if (!arr.length) {
     stats.innerHTML = "";
     return;
   }
 
-  const arr = data.map((x) => x.annual_usd);
-  const avg = Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
-  const min = Math.min(...arr);
-  const max = Math.max(...arr);
+  const average = Math.round(
+    arr.reduce((sum, value) => sum + value, 0) / arr.length
+  );
+
+  const median = calculateMedian(arr);
+  const min = arr[0];
+  const max = arr[arr.length - 1];
 
   const items = [
-    ["Matching records", data.length.toLocaleString()],
-    ["Average salary", fmtMoney.format(avg)],
-    ["Lowest salary", fmtMoney.format(min)],
-    ["Highest salary", fmtMoney.format(max)],
+    [
+      "Matching records",
+      data.length.toLocaleString(),
+    ],
+    [
+      "Average salary",
+      fmtMoney.format(average),
+    ],
+    [
+      "Median salary",
+      fmtMoney.format(median),
+    ],
+    [
+      "Lowest salary",
+      fmtMoney.format(min),
+    ],
+    [
+      "Highest salary",
+      fmtMoney.format(max),
+    ],
   ];
 
   stats.innerHTML = items
     .map(
       ([label, value]) => `
-      <article class="stat">
-        <h3>${esc(label)}</h3>
-        <p>${esc(value)}</p>
-      </article>
-    `
+        <article class="stat">
+          <h3>${esc(label)}</h3>
+          <p>${esc(value)}</p>
+        </article>
+      `
     )
     .join("");
 }
 
+function calculateMedian(sortedValues) {
+  const middle = Math.floor(sortedValues.length / 2);
+
+  if (sortedValues.length % 2 === 0) {
+    return Math.round(
+      (sortedValues[middle - 1] + sortedValues[middle]) / 2
+    );
+  }
+
+  return Math.round(sortedValues[middle]);
+}
+
+/* =========================================================
+   CHART
+========================================================= */
+
 function renderChart(data) {
   if (!data.length) {
-    chart.innerHTML = '<p class="muted">No records for current filters.</p>';
+    chart.innerHTML =
+      '<p class="muted">No records for current filters.</p>';
     return;
   }
 
-  const isGlobal = countryFilter.value === "all";
-  const title = isGlobal
-    ? "Top Roles by Average Salary (Global Mix)"
-    : "Top Roles by Average Salary";
+  const selectedCountry = countryFilter.value;
+
+  const title =
+    selectedCountry === "all"
+      ? "Top Roles by Average Salary (Global Mix)"
+      : "Top Roles by Average Salary";
 
   const byRole = new Map();
+
   for (const item of data) {
-    const bucket = byRole.get(item.role) || { sum: 0, count: 0 };
-    bucket.sum += item.annual_usd;
+    const salary = Number(item.annual_usd);
+
+    if (!Number.isFinite(salary)) {
+      continue;
+    }
+
+    const role = item.role || "Unknown role";
+
+    const bucket = byRole.get(role) || {
+      sum: 0,
+      count: 0,
+    };
+
+    bucket.sum += salary;
     bucket.count += 1;
-    byRole.set(item.role, bucket);
+
+    byRole.set(role, bucket);
   }
 
   const roleAverages = [...byRole.entries()]
-    .map(([role, agg]) => ({ role, avg: Math.round(agg.sum / agg.count) }))
+    .map(([role, aggregate]) => ({
+      role,
+      avg: Math.round(
+        aggregate.sum / aggregate.count
+      ),
+    }))
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 12);
 
-  const peak = roleAverages[0]?.avg || 1;
+  if (!roleAverages.length) {
+    chart.innerHTML =
+      '<p class="muted">No chart data available.</p>';
+    return;
+  }
+
+  const peak = roleAverages[0].avg || 1;
 
   chart.innerHTML = `
     <div class="chart-title">${esc(title)}</div>
+
     ${roleAverages
       .map(({ role, avg }) => {
-        const width = Math.max(4, Math.round((avg / peak) * 100));
+        const width = Math.max(
+          4,
+          Math.round((avg / peak) * 100)
+        );
+
         return `
           <div class="bar-row">
-            <span class="role-name">${esc(role)}</span>
-            <div class="track"><div class="fill" style="width:${width}%"></div></div>
-            <span class="salary">${esc(fmtMoney.format(avg))}</span>
+            <span class="role-name">
+              ${esc(role)}
+            </span>
+
+            <div class="track">
+              <div
+                class="fill"
+                style="width:${width}%"
+              ></div>
+            </div>
+
+            <span class="salary">
+              ${esc(fmtMoney.format(avg))}
+            </span>
           </div>
         `;
       })
@@ -181,87 +454,216 @@ function renderChart(data) {
   `;
 }
 
+/* =========================================================
+   TABLE
+========================================================= */
+
 function renderTableNextPage() {
-  resultCount.textContent = `${currentFiltered.length.toLocaleString()} results`;
+  resultCount.textContent =
+    `${currentFiltered.length.toLocaleString()} results`;
 
   if (!currentFiltered.length) {
-    salaryRows.innerHTML = '<tr><td colspan="4">No matching salaries.</td></tr>';
+    salaryRows.innerHTML = `
+      <tr>
+        <td colspan="4">
+          No matching salaries.
+        </td>
+      </tr>
+    `;
+
     loadMoreBtn.hidden = true;
     return;
   }
 
-  const sorted = currentFiltered.slice().sort((a, b) => b.annual_usd - a.annual_usd);
-  const nextSlice = sorted.slice(renderedCount, renderedCount + PAGE_SIZE);
+  const sorted = currentFiltered
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(b.annual_usd) -
+        Number(a.annual_usd)
+    );
+
+  const nextSlice = sorted.slice(
+    renderedCount,
+    renderedCount + PAGE_SIZE
+  );
 
   const rowsHtml = nextSlice
-    .map(
-      (item) => `
-      <tr>
-        <td>${esc(item.role)}</td>
-        <td>${esc(item.country)}</td>
-        <td>${esc(capitalize(item.level))}</td>
-        <td>${esc(fmtMoney.format(item.annual_usd))}</td>
-      </tr>
-    `
-    )
+    .map((item) => {
+      const salary = Number(item.annual_usd);
+
+      return `
+        <tr>
+          <td>
+            ${esc(item.role || "Unknown")}
+          </td>
+
+          <td>
+            ${esc(item.country || "Unknown")}
+          </td>
+
+          <td>
+            ${esc(
+              capitalize(
+                item.level || "Unknown"
+              )
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              Number.isFinite(salary)
+                ? fmtMoney.format(salary)
+                : "—"
+            )}
+          </td>
+        </tr>
+      `;
+    })
     .join("");
 
-  salaryRows.insertAdjacentHTML("beforeend", rowsHtml);
+  if (rowsHtml) {
+    salaryRows.insertAdjacentHTML(
+      "beforeend",
+      rowsHtml
+    );
+  }
 
   renderedCount += nextSlice.length;
-  loadMoreBtn.hidden = renderedCount >= currentFiltered.length;
-  loadMoreBtn.textContent = renderedCount >= currentFiltered.length ? "All loaded" : "Load more";
+
+  const allLoaded =
+    renderedCount >= currentFiltered.length;
+
+  loadMoreBtn.hidden = allLoaded;
+  loadMoreBtn.textContent = allLoaded
+    ? "All loaded"
+    : "Load more";
 }
 
-function syncTitleAndMeta() {
-  const c = countryFilter.value;
-  const l = levelFilter.value;
-  const r = roleFilter.value;
+/* =========================================================
+   PAGE META
+========================================================= */
 
-  const titleEl = document.getElementById("pageTitle");
-  const subEl = document.getElementById("pageSubtitle");
+function syncTitleAndMeta() {
+  const country = countryFilter.value;
+  const level = levelFilter.value;
+  const role = roleFilter.value;
+
+  const titleEl =
+    document.getElementById("pageTitle");
+
+  const subEl =
+    document.getElementById("pageSubtitle");
 
   const parts = [];
-  if (r !== "all") parts.push(r);
-  if (l !== "all") parts.push(capitalize(l));
-  if (c !== "all") parts.push(c);
 
-  const nice = parts.length ? parts.join(" • ") : "All countries • All roles • All levels";
+  if (role !== "all") {
+    parts.push(role);
+  }
 
-  if (titleEl) titleEl.textContent = "Developer Jobs — Yearly Salary (USD)";
-  if (subEl) subEl.textContent = `Showing: ${nice}`;
+  if (level !== "all") {
+    parts.push(capitalize(level));
+  }
 
-  document.title = `Developer Salary Explorer (Annual USD) — DevSalary`;
+  if (country !== "all") {
+    parts.push(country);
+  }
 
-  const metaDesc = document.querySelector('meta[name="description"]');
+  const nice = parts.length
+    ? parts.join(" • ")
+    : "All countries • All roles • All levels";
+
+  if (titleEl) {
+    titleEl.textContent =
+      "Developer Jobs — Yearly Salary (USD)";
+  }
+
+  if (subEl) {
+    subEl.textContent =
+      `Showing: ${nice}`;
+  }
+
+  document.title =
+    "Developer Salary Explorer (Annual USD) — DevSalary";
+
+  const metaDesc =
+    document.querySelector(
+      'meta[name="description"]'
+    );
+
   if (metaDesc) {
     metaDesc.setAttribute(
       "content",
-      "Explore estimated annual developer salaries by country, role, and level (Junior/Mid/Senior). Filter, compare averages, and view top-paying roles."
+      "Explore estimated annual developer salaries by country, role, and level. Filter, compare averages and medians, and view top-paying roles."
     );
   }
 }
 
+/* =========================================================
+   UI HELPERS
+========================================================= */
+
+function setLoadingState(isLoading) {
+  if (isLoading) {
+    loadNotice.textContent =
+      "Connecting to DevSalary API...";
+
+    if (loadMoreBtn) {
+      loadMoreBtn.disabled = true;
+    }
+  } else {
+    if (loadMoreBtn) {
+      loadMoreBtn.disabled = false;
+    }
+  }
+}
+
 function fillSelect(select, options) {
+  if (!select) return;
+
   select.innerHTML = options
-    .map((o) => `<option value="${escAttr(o.value)}">${esc(o.label)}</option>`)
+    .map(
+      (option) => `
+        <option value="${escAttr(
+          option.value
+        )}">
+          ${esc(option.label)}
+        </option>
+      `
+    )
     .join("");
 }
 
 function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  const text = String(value || "");
+
+  if (!text) {
+    return "";
+  }
+
+  return (
+    text.charAt(0).toUpperCase() +
+    text.slice(1)
+  );
 }
 
-function esc(str) {
-  return String(str).replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[m]));
+/* =========================================================
+   SECURITY / ESCAPING
+========================================================= */
+
+function esc(value) {
+  return String(value).replace(
+    /[&<>"']/g,
+    (match) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[match])
+  );
 }
 
-function escAttr(str) {
-  return esc(str);
+function escAttr(value) {
+  return esc(value);
 }

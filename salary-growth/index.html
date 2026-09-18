@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salary Growth Calculator — DevSalary</title>
+  <meta
+    name="description"
+    content="Estimate developer salary growth from your current salary, market median, and selected skills."
+  />
+  <link rel="icon" type="image/png" href="../logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="../">DevSalary</a>
+    <div class="nav-links">
+      <a href="../">Salary Explorer</a>
+      <a href="./" aria-current="page">Salary Growth</a>
+      <a href="../roadmap/">Roadmap</a>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="hero">
+      <p class="kicker">DevSalary v1.1</p>
+      <h1>How much can your skill stack move your salary?</h1>
+      <p class="subtitle">
+        Compare your current salary with the selected market and model a skill-based growth scenario.
+      </p>
+    </header>
+
+    <section class="panel controls-panel">
+      <form id="growthForm" class="growth-form">
+        <label>
+          Country
+          <select id="country" required></select>
+        </label>
+
+        <label>
+          Role
+          <select id="role" required></select>
+        </label>
+
+        <label>
+          Level
+          <select id="level" required>
+            <option value="junior">Junior</option>
+            <option value="mid" selected>Mid</option>
+            <option value="senior">Senior</option>
+          </select>
+        </label>
+
+        <label>
+          Current annual salary (USD)
+          <input id="currentSalary" type="number" min="1" step="100" placeholder="50000" required />
+        </label>
+
+        <div class="skills-field">
+          <div class="skills-header">
+            <span>Your skills</span>
+            <span id="selectedCount" class="count">0 selected</span>
+          </div>
+          <div id="skills" class="skills-grid"></div>
+        </div>
+
+        <button id="calculateBtn" class="btn" type="submit">Calculate salary growth</button>
+      </form>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"></p>
+
+    <section id="results" class="results" hidden>
+      <div class="stats-grid">
+        <article class="result-card">
+          <span>Current salary</span>
+          <strong id="currentSalaryValue">—</strong>
+        </article>
+        <article class="result-card">
+          <span>Market median</span>
+          <strong id="marketMedianValue">—</strong>
+        </article>
+        <article class="result-card featured">
+          <span>Estimated after selected skills</span>
+          <strong id="estimatedSalaryValue">—</strong>
+        </article>
+        <article class="result-card">
+          <span>Modeled skill growth</span>
+          <strong id="growthPercentValue">—</strong>
+        </article>
+      </div>
+
+      <section class="panel result-panel">
+        <div class="panel-header">
+          <h2>Skill impact model</h2>
+        </div>
+        <div id="selectedSkills" class="skill-results"></div>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="panel-header">
+          <h2>Recommended next skills</h2>
+        </div>
+        <div id="recommendedSkills" class="skill-results"></div>
+      </section>
+
+      <section class="panel model-note">
+        <strong>How to read this</strong>
+        <p id="modelNote"></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
