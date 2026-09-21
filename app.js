@@ -38,13 +38,12 @@ async function init() {
     salaries = await fetchAllSalaries();
 
     if (!Array.isArray(salaries)) {
-      throw new Error("Invalid salary data received from API");
+      throw new Error("Invalid salary data received from API.");
     }
 
     buildFilters();
     bindEvents();
 
-    // Set defaults
     countryFilter.value = "all";
     levelFilter.value = "all";
     roleFilter.value = "all";
@@ -52,13 +51,15 @@ async function init() {
     applyFiltersAndRender(true);
     syncTitleAndMeta();
 
-    loadNotice.textContent = `Connected to DevSalary API • ${salaries.length.toLocaleString()} records`;
+    loadNotice.textContent =
+      `Connected to DevSalary API • ${salaries.length.toLocaleString()} records`;
+
     loadNotice.classList.remove("error");
   } catch (error) {
     console.error("DevSalary initialization error:", error);
 
     loadNotice.textContent =
-      "Could not connect to the DevSalary API. Make sure the Go backend is running on http://localhost:8080.";
+      "Could not load salary data. Please try refreshing the page.";
 
     loadNotice.classList.add("error");
   } finally {
@@ -70,14 +71,23 @@ async function init() {
    API
 ========================================================= */
 
+function apiUrl(path = "") {
+  return new URL(
+    `${API_BASE_URL}${path}`,
+    window.location.origin
+  ).toString();
+}
+
 async function checkApi() {
-  const response = await fetch(`${API_BASE_URL}/health`, {
+  const response = await fetch(apiUrl("/health"), {
     method: "GET",
     cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error(`API health check failed: HTTP ${response.status}`);
+    throw new Error(
+      `API health check failed: HTTP ${response.status}`
+    );
   }
 }
 
@@ -86,7 +96,9 @@ async function fetchAllSalaries() {
   let offset = 0;
 
   while (true) {
-    const url = new URL(`${API_BASE_URL}/salaries`);
+    const url = new URL(
+      apiUrl("/salaries")
+    );
 
     url.searchParams.set("limit", API_PAGE_SIZE);
     url.searchParams.set("offset", offset);
@@ -123,7 +135,9 @@ async function fetchAllSalaries() {
 }
 
 async function fetchFilteredFromAPI() {
-  const url = new URL(`${API_BASE_URL}/salaries`);
+  const url = new URL(
+    apiUrl("/salaries")
+  );
 
   const country = countryFilter.value;
   const level = levelFilter.value;
@@ -141,9 +155,7 @@ async function fetchFilteredFromAPI() {
     url.searchParams.set("role", role);
   }
 
-  // Current frontend already has all records cached,
-  // so this function is available for future server-side filtering.
-  url.searchParams.set("limit", 200);
+  url.searchParams.set("limit", API_PAGE_SIZE);
   url.searchParams.set("offset", 0);
 
   const response = await fetch(url.toString(), {
@@ -196,23 +208,36 @@ function buildFilters() {
   ];
 
   fillSelect(countryFilter, [
-    { label: "All countries", value: "all" },
+    {
+      label: "All countries",
+      value: "all",
+    },
     ...countries.map((country) => ({
       label: country,
       value: country,
     })),
   ]);
 
-  // Keep the normal order even if database contains other values.
-  const preferredLevels = ["junior", "mid", "senior"];
+  const preferredLevels = [
+    "junior",
+    "mid",
+    "senior",
+  ];
 
   const sortedLevels = [
-    ...preferredLevels.filter((level) => levels.includes(level)),
-    ...levels.filter((level) => !preferredLevels.includes(level)),
+    ...preferredLevels.filter(
+      (level) => levels.includes(level)
+    ),
+    ...levels.filter(
+      (level) => !preferredLevels.includes(level)
+    ),
   ];
 
   fillSelect(levelFilter, [
-    { label: "All levels", value: "all" },
+    {
+      label: "All levels",
+      value: "all",
+    },
     ...sortedLevels.map((level) => ({
       label: capitalize(level),
       value: level,
@@ -220,7 +245,10 @@ function buildFilters() {
   ]);
 
   fillSelect(roleFilter, [
-    { label: "All roles", value: "all" },
+    {
+      label: "All roles",
+      value: "all",
+    },
     ...roles.map((role) => ({
       label: role,
       value: role,
@@ -229,13 +257,25 @@ function buildFilters() {
 }
 
 function bindEvents() {
-  countryFilter.addEventListener("change", handleFilterChange);
-  levelFilter.addEventListener("change", handleFilterChange);
-  roleFilter.addEventListener("change", handleFilterChange);
+  countryFilter.addEventListener(
+    "change",
+    handleFilterChange
+  );
 
-  loadMoreBtn.addEventListener("click", () => {
-    renderTableNextPage();
-  });
+  levelFilter.addEventListener(
+    "change",
+    handleFilterChange
+  );
+
+  roleFilter.addEventListener(
+    "change",
+    handleFilterChange
+  );
+
+  loadMoreBtn.addEventListener(
+    "click",
+    renderTableNextPage
+  );
 }
 
 function handleFilterChange() {
@@ -247,7 +287,9 @@ function handleFilterChange() {
    FILTERING
 ========================================================= */
 
-function applyFiltersAndRender(resetPagination = true) {
+function applyFiltersAndRender(
+  resetPagination = true
+) {
   currentFiltered = getFilteredData();
 
   if (resetPagination) {
@@ -261,9 +303,14 @@ function applyFiltersAndRender(resetPagination = true) {
 }
 
 function getFilteredData() {
-  const selectedCountry = countryFilter.value;
-  const selectedLevel = levelFilter.value;
-  const selectedRole = roleFilter.value;
+  const selectedCountry =
+    countryFilter.value;
+
+  const selectedLevel =
+    levelFilter.value;
+
+  const selectedRole =
+    roleFilter.value;
 
   return salaries.filter((item) => {
     const countryOk =
@@ -278,7 +325,11 @@ function getFilteredData() {
       selectedRole === "all" ||
       item.role === selectedRole;
 
-    return countryOk && levelOk && roleOk;
+    return (
+      countryOk &&
+      levelOk &&
+      roleOk
+    );
   });
 }
 
@@ -309,7 +360,10 @@ function renderStats(data) {
   }
 
   const average = Math.round(
-    arr.reduce((sum, value) => sum + value, 0) / arr.length
+    arr.reduce(
+      (sum, value) => sum + value,
+      0
+    ) / arr.length
   );
 
   const median = calculateMedian(arr);
@@ -352,11 +406,15 @@ function renderStats(data) {
 }
 
 function calculateMedian(sortedValues) {
-  const middle = Math.floor(sortedValues.length / 2);
+  const middle =
+    Math.floor(sortedValues.length / 2);
 
   if (sortedValues.length % 2 === 0) {
     return Math.round(
-      (sortedValues[middle - 1] + sortedValues[middle]) / 2
+      (
+        sortedValues[middle - 1] +
+        sortedValues[middle]
+      ) / 2
     );
   }
 
@@ -371,10 +429,12 @@ function renderChart(data) {
   if (!data.length) {
     chart.innerHTML =
       '<p class="muted">No records for current filters.</p>';
+
     return;
   }
 
-  const selectedCountry = countryFilter.value;
+  const selectedCountry =
+    countryFilter.value;
 
   const title =
     selectedCountry === "all"
@@ -384,18 +444,21 @@ function renderChart(data) {
   const byRole = new Map();
 
   for (const item of data) {
-    const salary = Number(item.annual_usd);
+    const salary =
+      Number(item.annual_usd);
 
     if (!Number.isFinite(salary)) {
       continue;
     }
 
-    const role = item.role || "Unknown role";
+    const role =
+      item.role || "Unknown role";
 
-    const bucket = byRole.get(role) || {
-      sum: 0,
-      count: 0,
-    };
+    const bucket =
+      byRole.get(role) || {
+        sum: 0,
+        count: 0,
+      };
 
     bucket.sum += salary;
     bucket.count += 1;
@@ -403,11 +466,14 @@ function renderChart(data) {
     byRole.set(role, bucket);
   }
 
-  const roleAverages = [...byRole.entries()]
+  const roleAverages = [
+    ...byRole.entries(),
+  ]
     .map(([role, aggregate]) => ({
       role,
       avg: Math.round(
-        aggregate.sum / aggregate.count
+        aggregate.sum /
+          aggregate.count
       ),
     }))
     .sort((a, b) => b.avg - a.avg)
@@ -416,19 +482,25 @@ function renderChart(data) {
   if (!roleAverages.length) {
     chart.innerHTML =
       '<p class="muted">No chart data available.</p>';
+
     return;
   }
 
-  const peak = roleAverages[0].avg || 1;
+  const peak =
+    roleAverages[0].avg || 1;
 
   chart.innerHTML = `
-    <div class="chart-title">${esc(title)}</div>
+    <div class="chart-title">
+      ${esc(title)}
+    </div>
 
     ${roleAverages
       .map(({ role, avg }) => {
         const width = Math.max(
           4,
-          Math.round((avg / peak) * 100)
+          Math.round(
+            (avg / peak) * 100
+          )
         );
 
         return `
@@ -445,7 +517,9 @@ function renderChart(data) {
             </div>
 
             <span class="salary">
-              ${esc(fmtMoney.format(avg))}
+              ${esc(
+                fmtMoney.format(avg)
+              )}
             </span>
           </div>
         `;
@@ -475,52 +549,67 @@ function renderTableNextPage() {
     return;
   }
 
-  const sorted = currentFiltered
-    .slice()
-    .sort(
-      (a, b) =>
-        Number(b.annual_usd) -
-        Number(a.annual_usd)
+  const sorted =
+    currentFiltered
+      .slice()
+      .sort(
+        (a, b) =>
+          Number(b.annual_usd) -
+          Number(a.annual_usd)
+      );
+
+  const nextSlice =
+    sorted.slice(
+      renderedCount,
+      renderedCount + PAGE_SIZE
     );
 
-  const nextSlice = sorted.slice(
-    renderedCount,
-    renderedCount + PAGE_SIZE
-  );
+  const rowsHtml =
+    nextSlice
+      .map((item) => {
+        const salary =
+          Number(item.annual_usd);
 
-  const rowsHtml = nextSlice
-    .map((item) => {
-      const salary = Number(item.annual_usd);
+        return `
+          <tr>
+            <td>
+              ${esc(
+                item.role ||
+                  "Unknown"
+              )}
+            </td>
 
-      return `
-        <tr>
-          <td>
-            ${esc(item.role || "Unknown")}
-          </td>
+            <td>
+              ${esc(
+                item.country ||
+                  "Unknown"
+              )}
+            </td>
 
-          <td>
-            ${esc(item.country || "Unknown")}
-          </td>
+            <td>
+              ${esc(
+                capitalize(
+                  item.level ||
+                    "Unknown"
+                )
+              )}
+            </td>
 
-          <td>
-            ${esc(
-              capitalize(
-                item.level || "Unknown"
-              )
-            )}
-          </td>
-
-          <td>
-            ${esc(
-              Number.isFinite(salary)
-                ? fmtMoney.format(salary)
-                : "—"
-            )}
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
+            <td>
+              ${esc(
+                Number.isFinite(
+                  salary
+                )
+                  ? fmtMoney.format(
+                      salary
+                    )
+                  : "—"
+              )}
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
 
   if (rowsHtml) {
     salaryRows.insertAdjacentHTML(
@@ -529,15 +618,20 @@ function renderTableNextPage() {
     );
   }
 
-  renderedCount += nextSlice.length;
+  renderedCount +=
+    nextSlice.length;
 
   const allLoaded =
-    renderedCount >= currentFiltered.length;
+    renderedCount >=
+    currentFiltered.length;
 
-  loadMoreBtn.hidden = allLoaded;
-  loadMoreBtn.textContent = allLoaded
-    ? "All loaded"
-    : "Load more";
+  loadMoreBtn.hidden =
+    allLoaded;
+
+  loadMoreBtn.textContent =
+    allLoaded
+      ? "All loaded"
+      : "Load more";
 }
 
 /* =========================================================
@@ -545,15 +639,24 @@ function renderTableNextPage() {
 ========================================================= */
 
 function syncTitleAndMeta() {
-  const country = countryFilter.value;
-  const level = levelFilter.value;
-  const role = roleFilter.value;
+  const country =
+    countryFilter.value;
+
+  const level =
+    levelFilter.value;
+
+  const role =
+    roleFilter.value;
 
   const titleEl =
-    document.getElementById("pageTitle");
+    document.getElementById(
+      "pageTitle"
+    );
 
   const subEl =
-    document.getElementById("pageSubtitle");
+    document.getElementById(
+      "pageSubtitle"
+    );
 
   const parts = [];
 
@@ -562,16 +665,19 @@ function syncTitleAndMeta() {
   }
 
   if (level !== "all") {
-    parts.push(capitalize(level));
+    parts.push(
+      capitalize(level)
+    );
   }
 
   if (country !== "all") {
     parts.push(country);
   }
 
-  const nice = parts.length
-    ? parts.join(" • ")
-    : "All countries • All roles • All levels";
+  const nice =
+    parts.length
+      ? parts.join(" • ")
+      : "All countries • All roles • All levels";
 
   if (titleEl) {
     titleEl.textContent =
@@ -607,35 +713,38 @@ function setLoadingState(isLoading) {
   if (isLoading) {
     loadNotice.textContent =
       "Connecting to DevSalary API...";
+  }
 
-    if (loadMoreBtn) {
-      loadMoreBtn.disabled = true;
-    }
-  } else {
-    if (loadMoreBtn) {
-      loadMoreBtn.disabled = false;
-    }
+  if (loadMoreBtn) {
+    loadMoreBtn.disabled = isLoading;
   }
 }
 
-function fillSelect(select, options) {
-  if (!select) return;
+function fillSelect(
+  select,
+  options
+) {
+  if (!select) {
+    return;
+  }
 
-  select.innerHTML = options
-    .map(
-      (option) => `
-        <option value="${escAttr(
-          option.value
-        )}">
-          ${esc(option.label)}
-        </option>
-      `
-    )
-    .join("");
+  select.innerHTML =
+    options
+      .map(
+        (option) => `
+          <option value="${escAttr(
+            option.value
+          )}">
+            ${esc(option.label)}
+          </option>
+        `
+      )
+      .join("");
 }
 
 function capitalize(value) {
-  const text = String(value || "");
+  const text =
+    String(value || "");
 
   if (!text) {
     return "";
@@ -654,13 +763,14 @@ function capitalize(value) {
 function esc(value) {
   return String(value).replace(
     /[&<>"']/g,
-    (match) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[match])
+    (match) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[match])
   );
 }
 
